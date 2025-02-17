@@ -3,45 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fumble Tracker</title>
+    <title>When Did Mg Kyaw Fumble Last?</title>
+    <script type="module">
+        // Import Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        
+        // Firebase configuration (Replace with your own Firebase config)
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        async function fetchLatestFumble() {
+            const q = query(collection(db, "approvedFumbles"), orderBy("date", "desc"), limit(1));
+            const querySnapshot = await getDocs(q);
+            
+            if (!querySnapshot.empty) {
+                const latestFumble = querySnapshot.docs[0].data();
+                document.getElementById("latestFumbleDate").innerHTML = `Last Fumble: <strong>${latestFumble.date}</strong>`;
+                document.getElementById("fumbleDescription").innerText = latestFumble.description;
+                updateCounter(new Date(latestFumble.date));
+            }
+        }
+        
+        function updateCounter(lastFumbleDate) {
+            const today = new Date();
+            const timeDiff = today - lastFumbleDate;
+            const daysSince = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+            document.getElementById("daysCounter").textContent = daysSince;
+        }
+        
+        document.addEventListener("DOMContentLoaded", fetchLatestFumble);
+    </script>
     <style>
         body { text-align: center; font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; }
         .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); }
         h1 { color: #b30000; }
-        .history-entry { border-bottom: 1px solid #ddd; padding: 10px; margin-bottom: 10px; }
         .counter { font-size: 2em; font-weight: bold; margin: 10px 0; }
-        .button { display: inline-block; text-decoration: none; color: white; background: #333; padding: 10px 20px; border-radius: 5px; margin: 10px; }
+        .button { display: inline-block; text-decoration: none; color: white; background: #333; padding: 10px 20px; border-radius: 5px; margin: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Breaking: Mg Kyaw's Latest Fumble</h1>
-        <p id="latestFumbleDate">Last Fumble: <strong>Not Available</strong></p>
+        <p id="latestFumbleDate">Last Fumble: <strong>Loading...</strong></p>
         <p class="counter">Days Since Last Fumble: <span id="daysCounter">0</span></p>
-        <p id="latestFumbleDescription"><em>No fumble recorded yet.</em></p>
+        <p><em id="fumbleDescription">Loading...</em></p>
         <a href="history.html" class="button">View Fumble History</a>
         <a href="submit.html" class="button">Submit a Fumble</a>
-        <a href="admin.html" class="button">Admin Login</a>
+        <a href="admin.html" class="button">Admin Panel</a>
     </div>
-    
-    <script>
-        function updateLatestFumble() {
-            let history = JSON.parse(localStorage.getItem("approvedFumbles")) || [];
-            if (history.length > 0) {
-                let latestFumble = history[history.length - 1];
-                document.getElementById("latestFumbleDate").innerHTML = `Last Fumble: <strong>${latestFumble.date}</strong>`;
-                document.getElementById("latestFumbleDescription").innerHTML = `<em>${latestFumble.description}</em>`;
-                
-                const lastFumbleDate = new Date(latestFumble.date);
-                const today = new Date();
-                const timeDiff = today - lastFumbleDate;
-                const daysSince = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-                document.getElementById("daysCounter").textContent = daysSince;
-            }
-        }
-        
-        window.addEventListener("storage", updateLatestFumble);
-        updateLatestFumble();
-    </script>
 </body>
 </html>
