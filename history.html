@@ -10,6 +10,46 @@
         h1 { color: #b30000; }
         .history-entry { border-bottom: 1px solid #ddd; padding: 10px; margin-bottom: 10px; }
     </style>
+    <script type="module">
+        // Import Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBL4uYhJqa3HPf1Cq7mV0l2023xIAZCUIY",
+            authDomain: "bigcat-464fe.firebaseapp.com",
+            projectId: "bigcat-464fe",
+            storageBucket: "bigcat-464fe.firebasestorage.app",
+            messagingSenderId: "117805989159",
+            appId: "1:117805989159:web:38d30263cd7a95e1b7bd02"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function loadHistory() {
+            const historyList = document.getElementById("historyList");
+            historyList.innerHTML = "";
+
+            try {
+                const querySnapshot = await getDocs(collection(db, "pendingFumbles"));
+                querySnapshot.forEach(doc => {
+                    let entry = doc.data();
+                    let div = document.createElement("div");
+                    div.className = "history-entry";
+                    div.innerHTML = `<strong>${entry.date}</strong>: <em>${entry.description}</em>`;
+                    historyList.appendChild(div);
+                });
+            } catch (error) {
+                console.error("Error loading history: ", error);
+                historyList.innerHTML = "<p>Failed to load history.</p>";
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", loadHistory);
+    </script>
 </head>
 <body>
     <div class="container">
@@ -17,20 +57,5 @@
         <div id="historyList"></div>
         <a href="index.html">Back to Home</a>
     </div>
-    <script>
-        function loadHistory() {
-            let history = JSON.parse(localStorage.getItem("fumbleHistory")) || [];
-            let historyList = document.getElementById("historyList");
-            historyList.innerHTML = "";
-            
-            history.forEach(entry => {
-                let div = document.createElement("div");
-                div.className = "history-entry";
-                div.innerHTML = `<strong>${entry.date}</strong>: <em>${entry.description}</em>`;
-                historyList.appendChild(div);
-            });
-        }
-        loadHistory();
-    </script>
 </body>
 </html>
