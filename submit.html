@@ -11,6 +11,52 @@
         .button { display: inline-block; text-decoration: none; color: white; background: #333; padding: 10px 20px; border-radius: 5px; margin: 10px; cursor: pointer; }
         .input-field { width: 80%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; }
     </style>
+    <script type="module">
+        // Import Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBL4uYhJqa3HPf1Cq7mV0l2023xIAZCUIY",
+            authDomain: "bigcat-464fe.firebaseapp.com",
+            projectId: "bigcat-464fe",
+            storageBucket: "bigcat-464fe.firebasestorage.app",
+            messagingSenderId: "117805989159",
+            appId: "1:117805989159:web:38d30263cd7a95e1b7bd02"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("fumbleForm").addEventListener("submit", async function(event) {
+                event.preventDefault();
+                
+                let fumbleDate = document.getElementById("fumbleDate").value;
+                let fumbleDescription = document.getElementById("fumbleDescription").value;
+                
+                if (!fumbleDate || !fumbleDescription.trim()) {
+                    alert("Please fill in all fields.");
+                    return;
+                }
+                
+                try {
+                    await addDoc(collection(db, "pendingFumbles"), {
+                        date: fumbleDate,
+                        description: fumbleDescription,
+                        timestamp: new Date()
+                    });
+                    alert("Fumble submitted for review!");
+                    document.getElementById("fumbleForm").reset();
+                } catch (error) {
+                    console.error("Error submitting fumble: ", error);
+                    alert("Failed to submit fumble. Try again later.");
+                }
+            });
+        });
+    </script>
 </head>
 <body>
     <div class="container">
@@ -22,26 +68,5 @@
         </form>
         <a href="index.html" class="button">Back to Home</a>
     </div>
-    
-    <script>
-        document.getElementById("fumbleForm").addEventListener("submit", function(event) {
-            event.preventDefault();
-            
-            let fumbleDate = document.getElementById("fumbleDate").value;
-            let fumbleDescription = document.getElementById("fumbleDescription").value;
-            
-            if (!fumbleDate || !fumbleDescription.trim()) {
-                alert("Please fill in all fields.");
-                return;
-            }
-            
-            let pendingFumbles = JSON.parse(localStorage.getItem("pendingFumbles")) || [];
-            pendingFumbles.push({ date: fumbleDate, description: fumbleDescription });
-            localStorage.setItem("pendingFumbles", JSON.stringify(pendingFumbles));
-            
-            alert("Fumble submitted for review!");
-            document.getElementById("fumbleForm").reset();
-        });
-    </script>
 </body>
 </html>
