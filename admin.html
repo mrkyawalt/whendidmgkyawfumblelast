@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <style>
+        body { text-align: center; font-family: Arial, sans-serif; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); }
+        .submission { border-bottom: 1px solid #ddd; padding: 10px; margin-bottom: 10px; }
+        input, textarea, button { width: 90%; padding: 10px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Admin Panel</h1>
+        <h2>Review Submissions</h2>
+        <div id="submissionList"></div>
+        
+        <h2>Manually Add a Fumble</h2>
+        <input type="text" id="manualName" placeholder="Name" required>
+        <input type="date" id="manualDate" required>
+        <textarea id="manualDesc" placeholder="Describe the fumble" rows="4" required></textarea>
+        <button onclick="addManualFumble()">Add Fumble</button>
+    </div>
+    <script>
+        if (localStorage.getItem("adminLoggedIn") !== "true") {
+            window.location.href = "admin-login.html";
+        }
+        
+        function loadSubmissions() {
+            let submissions = JSON.parse(localStorage.getItem("submissions")) || [];
+            let submissionList = document.getElementById("submissionList");
+            submissionList.innerHTML = "";
+            
+            submissions.forEach((submission, index) => {
+                let div = document.createElement("div");
+                div.className = "submission";
+                div.innerHTML = `<strong>${submission.name}</strong> (${submission.fumbleDate}): <em>${submission.fumbleDesc}</em><br>
+                    <button onclick="approveFumble(${index})">Approve</button>
+                    <button onclick="deleteFumble(${index})">Delete</button>`;
+                submissionList.appendChild(div);
+            });
+        }
+
+        function approveFumble(index) {
+            let submissions = JSON.parse(localStorage.getItem("submissions")) || [];
+            let approvedFumble = submissions[index];
+            localStorage.setItem("fumbleDate", approvedFumble.fumbleDate);
+            localStorage.setItem("fumbleDesc", approvedFumble.fumbleDesc);
+            
+            submissions.splice(index, 1);
+            localStorage.setItem("submissions", JSON.stringify(submissions));
+            loadSubmissions();
+        }
+
+        function deleteFumble(index) {
+            let submissions = JSON.parse(localStorage.getItem("submissions")) || [];
+            submissions.splice(index, 1);
+            localStorage.setItem("submissions", JSON.stringify(submissions));
+            loadSubmissions();
+        }
+
+        function addManualFumble() {
+            let name = document.getElementById("manualName").value;
+            let fumbleDate = document.getElementById("manualDate").value;
+            let fumbleDesc = document.getElementById("manualDesc").value;
+            
+            if (!name || !fumbleDate || !fumbleDesc) {
+                alert("Please fill in all fields.");
+                return;
+            }
+            
+            localStorage.setItem("fumbleDate", fumbleDate);
+            localStorage.setItem("fumbleDesc", fumbleDesc);
+            alert("Fumble added successfully!");
+            
+            document.getElementById("manualName").value = "";
+            document.getElementById("manualDate").value = "";
+            document.getElementById("manualDesc").value = "";
+        }
+
+        loadSubmissions();
+    </script>
+</body>
+</html>

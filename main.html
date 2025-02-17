@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>When Did Mg Kyaw Fumble Last?</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #b30000;
+        }
+        .counter {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .history-link, .admin-link {
+            margin-top: 20px;
+            display: inline-block;
+            text-decoration: none;
+            color: white;
+            background: #333;
+            padding: 10px 20px;
+            border-radius: 5px;
+        }
+        .submission-form {
+            margin-top: 20px;
+            padding: 15px;
+            background: #eaeaea;
+            border-radius: 5px;
+        }
+        .submission-form input, .submission-form textarea, .submission-form button {
+            margin: 5px;
+            padding: 10px;
+            width: 90%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Breaking: Mg Kyaw's Latest Fumble</h1>
+        <p id="latestFumbleDate">Last Fumble: <strong></strong></p>
+        <p class="counter">Days Since Last Fumble: <span id="daysCounter">0</span></p>
+        <p id="latestFumbleDesc"><em></em></p>
+        <a href="history.html" class="history-link">View Fumble History</a>
+        <a href="admin-login.html" class="admin-link">Admin Panel</a>
+    </div>
+
+    <div class="container submission-form">
+        <h2>Submit a Fumble</h2>
+        <form id="fumbleForm">
+            <input type="text" id="name" placeholder="Your Name" required>
+            <input type="date" id="fumbleDate" required>
+            <textarea id="fumbleDesc" placeholder="Describe the fumble" rows="4" required></textarea>
+            <button type="submit">Submit Fumble</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById("fumbleForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            
+            let name = document.getElementById("name").value;
+            let fumbleDate = document.getElementById("fumbleDate").value;
+            let fumbleDesc = document.getElementById("fumbleDesc").value;
+            
+            let submissions = JSON.parse(localStorage.getItem("submissions")) || [];
+            submissions.push({ name, fumbleDate, fumbleDesc });
+            localStorage.setItem("submissions", JSON.stringify(submissions));
+            
+            alert("Fumble submitted for review!");
+            document.getElementById("fumbleForm").reset();
+        });
+    </script>
+</body>
+</html>
