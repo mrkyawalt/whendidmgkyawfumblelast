@@ -10,6 +10,83 @@
         .submission { border-bottom: 1px solid #ddd; padding: 10px; margin-bottom: 10px; }
         input, textarea, button { width: 90%; padding: 10px; margin: 5px; }
     </style>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyBL4uYhJqa3HPf1Cq7mV0l2023xIAZCUIY",
+            authDomain: "bigcat-464fe.firebaseapp.com",
+            projectId: "bigcat-464fe",
+            storageBucket: "bigcat-464fe.firebasestorage.app",
+            messagingSenderId: "117805989159",
+            appId: "1:117805989159:web:38d30263cd7a95e1b7bd02"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function loadSubmissions() {
+            const submissionList = document.getElementById("submissionList");
+            submissionList.innerHTML = "";
+            try {
+                const querySnapshot = await getDocs(collection(db, "pendingFumbles"));
+                querySnapshot.forEach(doc => {
+                    let entry = doc.data();
+                    let div = document.createElement("div");
+                    div.className = "submission";
+                    div.innerHTML = `<strong>${entry.name}</strong> (${entry.date}): <em>${entry.description}</em><br>
+                        <button onclick="approveFumble('${doc.id}', '${entry.date}', '${entry.description}')">Approve</button>
+                        <button onclick="deleteFumble('${doc.id}')">Delete</button>`;
+                    submissionList.appendChild(div);
+                });
+            } catch (error) {
+                console.error("Error loading submissions: ", error);
+            }
+        }
+
+        async function approveFumble(id, date, description) {
+            try {
+                await addDoc(collection(db, "approvedFumbles"), { date, description });
+                await deleteDoc(doc(db, "pendingFumbles", id));
+                loadSubmissions();
+            } catch (error) {
+                console.error("Error approving fumble: ", error);
+            }
+        }
+
+        async function deleteFumble(id) {
+            try {
+                await deleteDoc(doc(db, "pendingFumbles", id));
+                loadSubmissions();
+            } catch (error) {
+                console.error("Error deleting fumble: ", error);
+            }
+        }
+
+        async function addManualFumble() {
+            let name = document.getElementById("manualName").value;
+            let date = document.getElementById("manualDate").value;
+            let description = document.getElementById("manualDesc").value;
+
+            if (!name || !date || !description) {
+                alert("Please fill in all fields.");
+                return;
+            }
+            
+            try {
+                await addDoc(collection(db, "approvedFumbles"), { date, description });
+                alert("Fumble added successfully!");
+                document.getElementById("manualName").value = "";
+                document.getElementById("manualDate").value = "";
+                document.getElementById("manualDesc").value = "";
+            } catch (error) {
+                console.error("Error adding fumble: ", error);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", loadSubmissions);
+    </script>
 </head>
 <body>
     <div class="container">
@@ -24,64 +101,5 @@
         <button onclick="addManualFumble()">Add Fumble</button>
         <a href="index.html" class="button">Back to Home</a>
     </div>
-    <script>
-        if (localStorage.getItem("adminLoggedIn") !== "true") {
-            window.location.href = "admin-login.html";
-        }
-        
-        function loadSubmissions() {
-            let submissions = JSON.parse(localStorage.getItem("submissions")) || [];
-            let submissionList = document.getElementById("submissionList");
-            submissionList.innerHTML = "";
-            
-            submissions.forEach((submission, index) => {
-                let div = document.createElement("div");
-                div.className = "submission";
-                div.innerHTML = `<strong>${submission.name}</strong> (${submission.fumbleDate}): <em>${submission.fumbleDesc}</em><br>
-                    <button onclick="approveFumble(${index})">Approve</button>
-                    <button onclick="deleteFumble(${index})">Delete</button>`;
-                submissionList.appendChild(div);
-            });
-        }
-
-        function approveFumble(index) {
-            let submissions = JSON.parse(localStorage.getItem("submissions")) || [];
-            let approvedFumble = submissions[index];
-            localStorage.setItem("fumbleDate", approvedFumble.fumbleDate);
-            localStorage.setItem("fumbleDesc", approvedFumble.fumbleDesc);
-            
-            submissions.splice(index, 1);
-            localStorage.setItem("submissions", JSON.stringify(submissions));
-            loadSubmissions();
-        }
-
-        function deleteFumble(index) {
-            let submissions = JSON.parse(localStorage.getItem("submissions")) || [];
-            submissions.splice(index, 1);
-            localStorage.setItem("submissions", JSON.stringify(submissions));
-            loadSubmissions();
-        }
-
-        function addManualFumble() {
-            let name = document.getElementById("manualName").value;
-            let fumbleDate = document.getElementById("manualDate").value;
-            let fumbleDesc = document.getElementById("manualDesc").value;
-            
-            if (!name || !fumbleDate || !fumbleDesc) {
-                alert("Please fill in all fields.");
-                return;
-            }
-            
-            localStorage.setItem("fumbleDate", fumbleDate);
-            localStorage.setItem("fumbleDesc", fumbleDesc);
-            alert("Fumble added successfully!");
-            
-            document.getElementById("manualName").value = "";
-            document.getElementById("manualDate").value = "";
-            document.getElementById("manualDesc").value = "";
-        }
-
-        loadSubmissions();
-    </script>
 </body>
 </html>
