@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit a Fumble</title>
+    <style>
+        body { text-align: center; font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); }
+        h1 { color: #b30000; }
+        .button { display: inline-block; text-decoration: none; color: white; background: #333; padding: 10px 20px; border-radius: 5px; margin: 10px; cursor: pointer; }
+        .input-field { width: 80%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Submit a Fumble</h1>
+        <form id="fumbleForm">
+            <input type="date" id="fumbleDate" class="input-field" required>
+            <textarea id="fumbleDescription" class="input-field" rows="4" placeholder="Describe the fumble..." required></textarea>
+            <button type="submit" class="button">Submit</button>
+        </form>
+        <a href="index.html" class="button">Back to Home</a>
+    </div>
+    
+    <script>
+        document.getElementById("fumbleForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            
+            let fumbleDate = document.getElementById("fumbleDate").value;
+            let fumbleDescription = document.getElementById("fumbleDescription").value;
+            
+            if (!fumbleDate || !fumbleDescription.trim()) {
+                alert("Please fill in all fields.");
+                return;
+            }
+            
+            let pendingFumbles = JSON.parse(localStorage.getItem("pendingFumbles")) || [];
+            pendingFumbles.push({ date: fumbleDate, description: fumbleDescription });
+            localStorage.setItem("pendingFumbles", JSON.stringify(pendingFumbles));
+            
+            alert("Fumble submitted for review!");
+            document.getElementById("fumbleForm").reset();
+        });
+    </script>
+</body>
+</html>
